@@ -1,40 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-} from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const ClientDisplay = () => {
+  const theme = useTheme();
   const [currentTurn, setCurrentTurn] = useState(null);
   const [calledHistory, setCalledHistory] = useState([]);
-  const [selectedBox, setSelectedBox] = useState('1');
+  const [_refreshInterval, setRefreshInterval] = useState(null);
 
   // Load data from localStorage
-  useEffect(() => {
-    const savedCurrentTurn = JSON.parse(localStorage.getItem('currentTurn') || 'null');
+  const loadData = () => {
     const savedCalledHistory = JSON.parse(localStorage.getItem('calledHistory') || '[]');
-    const savedSelectedBox = localStorage.getItem('selectedBox') || '1';
+    const savedCurrentTurn = JSON.parse(localStorage.getItem('currentTurn') || 'null');
     
+    // Get the current turn
     setCurrentTurn(savedCurrentTurn);
-    setCalledHistory(savedCalledHistory);
-    setSelectedBox(savedSelectedBox);
+    
+    // Get called history (last 5 entries)
+    const history = savedCalledHistory
+      .slice(0, 5); // Already sorted by date in TurnManager
+    setCalledHistory(history);
+  };
+
+  // Auto-refresh every 5 seconds
+  useEffect(() => {
+    loadData(); // Initial load
+    const interval = setInterval(loadData, 5000); // Refresh every 5 seconds
+    setRefreshInterval(interval);
+    return () => clearInterval(interval);
   }, []);
 
   // Update when localStorage changes
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const savedCurrentTurn = JSON.parse(localStorage.getItem('currentTurn') || 'null');
-      const savedCalledHistory = JSON.parse(localStorage.getItem('calledHistory') || '[]');
-      const savedSelectedBox = localStorage.getItem('selectedBox') || '1';
-      
-      setCurrentTurn(savedCurrentTurn);
-      setCalledHistory(savedCalledHistory);
-      setSelectedBox(savedSelectedBox);
+      loadData();
     });
 
     observer.observe(document, { subtree: true, childList: true });
@@ -42,92 +41,114 @@ const ClientDisplay = () => {
   }, []);
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, bgcolor: 'background.default', minHeight: '100vh', p: 4 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-        {/* Current Turn Display */}
-        {currentTurn && (
-          <Paper
-            elevation={4}
-            sx={{
-              p: 8,
-              textAlign: 'center',
-              minHeight: '400px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'primary.light',
-              borderRadius: 3,
-              boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
-            }}
-          >
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography 
-                variant="h1" 
-                component="h1" 
-                gutterBottom 
-                sx={{ 
-                  fontWeight: 600,
-                  color: '#1e8449',
-                  fontSize: '4rem',
-                  lineHeight: 1.2,
-                }}
-              >
-                {currentTurn.lastName} {currentTurn.dni.slice(-3)}
-              </Typography>
-              <Typography 
-                variant="h2" 
-                component="h2" 
-                sx={{ 
-                  color: 'secondary.main',
-                  fontWeight: 600,
-                  fontSize: '3rem',
-                  lineHeight: 1.2,
-                }}
-              >
-                Box {selectedBox}
-              </Typography>
-            </Box>
-          </Paper>
-        )}
-
-        {/* History Display */}
-        <Paper 
-          sx={{ 
-            p: 3,
-            width: '100%',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.05)',
+    <Box
+      sx={{
+        width: '100vw',
+        height: '100vh',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 1,
+      }}
+    >
+      {/* Black border with 1cm margin */}
+      <Box
+        sx={{
+          width: 'calc(100% - 2cm)',
+          height: 'calc(100% - 2cm)',
+          bgcolor: 'black',
+          position: 'absolute',
+          top: '1cm',
+          left: '1cm',
+          zIndex: 2,
+        }}
+      />
+      {/* Green background with content */}
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          bgcolor: theme.palette.primary.light,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 4,
+        }}
+      >
+        <Typography
+          variant="h1"
+          component="h1"
+          sx={{
+            color: 'black',
+            fontSize: '3rem',
+            fontWeight: 600,
+            mb: 2,
+            textAlign: 'center',
           }}
         >
-          <Typography variant="h4" gutterBottom sx={{ color: '#1e8449', fontWeight: 600 }}>
-            Últimos 5 llamados
+          Turno de:
+        </Typography>
+        {currentTurn && (
+          <Typography
+            variant="h2"
+            component="h2"
+            sx={{
+              color: 'black',
+              fontSize: '5rem',
+              fontWeight: 600,
+              textAlign: 'center',
+            }}
+          >
+            {currentTurn && currentTurn.name} {currentTurn && currentTurn.lastName}
+            <br />
+            {currentTurn && currentTurn.dni.slice(-3)}
+            <br />
+            Box: {currentTurn && currentTurn.box}
           </Typography>
-          <List sx={{ bgcolor: 'background.paper' }}>
-            {calledHistory.map((historyItem, index) => (
-              <ListItem 
-                key={historyItem.id}
-                sx={{
-                  '&:hover': {
-                    bgcolor: 'primary.light',
-                  },
-                }}
-              >
+        )}
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{
+            mb: 4,
+            textAlign: 'center',
+          }}
+        >
+          Último turno llamado: {currentTurn ? `${currentTurn.name} - ${currentTurn.dni}` : 'Ninguno'}
+        </Typography>
+        <Typography
+          variant="h3"
+          component="h3"
+          sx={{
+            color: 'black',
+            fontSize: '2rem',
+            fontWeight: 600,
+            mb: 2,
+            textAlign: 'center',
+          }}
+        >
+          Últimos 5 turnos llamados:
+        </Typography>
+        <Box sx={{ width: '80%', maxWidth: '600px' }}>
+          <List>
+            {calledHistory.map((turn, index) => (
+              <ListItem key={index} sx={{ mb: 1 }}>
                 <ListItemText
-                  primaryTypographyProps={{ 
-                    fontWeight: 500,
-                    color: '#1e8449',
-                  }}
-                  primary={`${historyItem.lastName} ${historyItem.dni.slice(-3)}`}
-                  secondaryTypographyProps={{ color: 'text.secondary' }}
-                  secondary={`Box ${historyItem.box} - ${new Date(historyItem.timestamp).toLocaleString()}`}
+                  primary={`${turn.name} ${turn.lastName} - ${turn.dni.slice(-3)}`}
+                  secondary={`Box: ${turn.box} - ${new Date(turn.calledAt).toLocaleString()}`}
+                  sx={{ color: 'black' }}
                 />
               </ListItem>
             ))}
           </List>
-        </Paper>
+        </Box>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

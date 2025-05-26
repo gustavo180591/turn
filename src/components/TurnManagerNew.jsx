@@ -107,7 +107,7 @@ const TurnManager = () => {
     return dni.slice(-3);
   };
 
-  const toggleBox = (boxId) => {
+  const _toggleBox = (boxId) => {
     setBoxes(boxes.map(box => 
       box.id === boxId ? { ...box, active: !box.active } : box
     ));

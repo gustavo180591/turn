@@ -1,4 +1,4 @@
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme, Box } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import TurnManagerNew from './components/TurnManagerNew.jsx';
 import ClientDisplay from './components/ClientDisplay.jsx';
@@ -6,16 +6,16 @@ import ClientDisplay from './components/ClientDisplay.jsx';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1e8449', // Darker green
+      main: '#1e8449',
       light: '#27ae60',
-      dark: '#166938', // Even darker green
+      dark: '#166938',
     },
     background: {
       default: '#ffffff',
       paper: '#ffffff',
     },
     text: {
-      primary: '#1e8449', // Darker green
+      primary: '#1e8449',
       secondary: '#1e8449',
     },
   },
@@ -24,7 +24,7 @@ const theme = createTheme({
     h1: {
       fontSize: '2.5rem',
       fontWeight: 500,
-      color: '#1e8449', // Darker green
+      color: '#1e8449',
     },
     h2: {
       fontSize: '2rem',
@@ -65,9 +65,12 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ p: 3 }}>
-        <TurnManagerNew />
-      </Box>
+      <Router>
+        <Routes>
+          <Route path="/" element={<TurnManagerNew />} />
+          <Route path="/client" element={<ClientDisplay />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
