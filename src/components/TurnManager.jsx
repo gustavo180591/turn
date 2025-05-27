@@ -103,16 +103,21 @@ const TurnManager = () => {
     const nextTurn = turns[0];
     if (!nextTurn) return;
 
-    const formattedDni = formatDni(nextTurn.dni);
     const newHistoryItem = {
       id: Date.now(),
-      name: `${nextTurn.name} ${nextTurn.lastName}`,
-      dni: formattedDni,
+      name: nextTurn.name,
+      lastName: nextTurn.lastName,
+      dni: nextTurn.dni,
       box: boxes[selectedBox - 1].name,
+      timestamp: new Date().toISOString()
     };
 
     setCalledHistory([newHistoryItem, ...calledHistory].slice(0, 5));
-    setCurrentTurn(newHistoryItem);
+    setCurrentTurn({
+      ...newHistoryItem,
+      name: `${nextTurn.name} ${nextTurn.lastName}`,
+      box: boxes[selectedBox - 1].name
+    });
     setTurns(turns.slice(1));
   };
 
