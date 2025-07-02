@@ -1,0 +1,17 @@
+{
+    "name": "turnos-frontend",
+    "version": "1.0.0",
+    "scripts": {
+      "dev": "vite dev",
+      "build": "vite build",
+      "preview": "vite preview"
+    },
+    "type": "module",
+    "dependencies": {
+      "@sveltejs/kit": "latest",
+      "svelte": "latest"
+    },
+    "devDependencies": {
+      "vite": "^4.4.9"
+    }
+  }
